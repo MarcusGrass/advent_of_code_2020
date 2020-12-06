@@ -14,5 +14,6 @@ fn main() {
     // solutions::aoc_two::solve_both(&session);
     // solutions::aoc_three::solve_both(&session);
     // solutions::aoc_four::solve_both(&session);
-    solutions::aoc_five::solve_both(&session)
+    // solutions::aoc_five::solve_both(&session);
+    // solutions::aoc_six::solve_both(&session);
 }
