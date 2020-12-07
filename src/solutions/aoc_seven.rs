@@ -3,9 +3,7 @@ use std::borrow::BorrowMut;
 
 pub fn solve_both(session: &str) {
     let lines = crate::util::fetch_lines(7, session);
-    // solve_first(&lines);
-    // let grouped = to_group_responses(&lines);
-    //solve_first(&grouped);
+    solve_first(&lines);
     solve_second(&lines);
 }
 
@@ -166,9 +164,3 @@ struct BagTree {
     nodes: Vec<BagTree>,
 }
 
-#[derive(Debug, Clone)]
-struct DetailedBagTree {
-    bag: String,
-    amount: i32,
-    nodes: Vec<DetailedBagTree>,
-}
