@@ -63,14 +63,6 @@ fn to_bag(line: &String) -> Bag {
     }
 }
 
-fn to_complete_map(lines: &Vec<String>) {
-    let mut bags = HashMap::new();
-    for line in lines {
-        let bag = to_bag(line);
-        bags.insert(String::from(&bag.color), bag);
-    }
-}
-
 fn search_for(color: &str, bags: HashMap<String, Bag>) -> i32 {
     let root = construct_reverse_bag_tree(color, bags);
     find_unique_containing(&root).len() as i32
