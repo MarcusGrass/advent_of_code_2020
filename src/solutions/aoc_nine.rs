@@ -1,7 +1,8 @@
 pub fn solve_both(session: &str) {
     let lines = crate::util::fetch_lines(9, session);
-    let numbers = to_numbers(&lines);
-
+    let numbers = lines.iter()
+        .map(|s| s.parse().unwrap())
+        .collect();
     let needle = solve_first(&numbers);
     solve_second(needle, &numbers);
 }
@@ -46,12 +47,4 @@ fn solve_second(needle: i64, numbers: &Vec<i64>) {
         }
         start += 1;
     }
-}
-
-fn to_numbers(lines: &Vec<String>) -> Vec<i64> {
-    let mut numbers = Vec::with_capacity(lines.len());
-    for line in lines {
-        numbers.push(line.parse().unwrap())
-    }
-    numbers
 }
