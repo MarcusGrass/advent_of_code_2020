@@ -1,4 +1,4 @@
-use crate::util::{modulo, modulo64};
+use crate::util::{modulo};
 use std::collections::{HashMap, HashSet};
 use std::collections::hash_map::Entry;
 use std::collections::hash_map::Entry::Vacant;
@@ -25,7 +25,7 @@ fn solve_first(lines: &Vec<String>) {
 }
 
 fn find_wait(departure: &i128, bus_id: &i128) -> i128 {
-    bus_id - modulo64(departure.clone(), bus_id.clone())
+    bus_id - modulo(departure.clone(), bus_id.clone())
 }
 
 fn to_schedule(lines: &Vec<String>) -> Schedule {
@@ -43,7 +43,7 @@ fn solve_second(lines: &Vec<String>) {
     let departures = to_departures(lines);
     let colls = to_remainder_parts(&departures);
     let modulo = do_remainder(&colls);
-    println!("13.2 = {:?}", modulo.0 - departures[departures.len() - 1].offset);
+    println!("13.2 = {:?}", modulo - departures[departures.len() - 1].offset);
 }
 
 fn calculate(departures: &Vec<Departure>) -> i128 {
@@ -57,11 +57,11 @@ fn calculate(departures: &Vec<Departure>) -> i128 {
 fn to_remainder_parts(departures: &Vec<Departure>) -> Vec<RemainderPart> {
     let max_offset = departures[departures.len() - 1].offset;
     departures.iter()
-        .map(|d| RemainderPart{rem: modulo64(max_offset - d.offset, d.id), modulo: d.id})
+        .map(|d| RemainderPart{rem: modulo(max_offset - d.offset, d.id), modulo: d.id})
         .collect()
 }
 
-fn do_remainder(remainders: &Vec<RemainderPart>) -> (i128, i128) {
+fn do_remainder(remainders: &Vec<RemainderPart>) -> i128 {
     let mut parts: Vec<i128> = vec![0; remainders.len()];
     for i in 0..remainders.len() {
         let wanted_mod = remainders[i].modulo;
@@ -79,7 +79,7 @@ fn do_remainder(remainders: &Vec<RemainderPart>) -> (i128, i128) {
     for i in 0..remainders.len() {
         let wanted_mod = remainders[i].modulo;
         let wanted_rem = remainders[i].rem;
-        let actual = modulo64(parts[i], wanted_mod);
+        let actual = modulo(parts[i], wanted_mod);
         if actual != wanted_rem {
             parts[i] *= modinverse(actual, wanted_mod).unwrap() * wanted_rem;
         }
@@ -93,7 +93,7 @@ fn do_remainder(remainders: &Vec<RemainderPart>) -> (i128, i128) {
     for remainder in remainders {
         last_mod *= remainder.modulo;
     }
-    (modulo64(sum, last_mod), last_mod)
+    modulo(sum, last_mod)
 }
 
 fn to_departures(lines: &Vec<String>) -> Vec<Departure> {
