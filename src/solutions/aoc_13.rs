@@ -1,7 +1,4 @@
 use crate::util::{modulo};
-use std::collections::{HashMap, HashSet};
-use std::collections::hash_map::Entry;
-use std::collections::hash_map::Entry::Vacant;
 use modinverse::modinverse;
 
 pub fn solve_both(session: &str) {
