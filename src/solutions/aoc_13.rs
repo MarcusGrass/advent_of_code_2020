@@ -4,13 +4,48 @@ use std::collections::hash_map::Entry;
 use std::collections::hash_map::Entry::Vacant;
 
 pub fn solve_both(session: &str) {
-    //let lines = crate::util::fetch_lines(13, session);
+    let lines = crate::util::fetch_lines(13, session);
+    /*
     let lines = vec![
         String::from("939"),
         String::from("7,13,x,x,59,x,31,19"),
     ];
+
+     */
     solve_first(&lines);
-    solve_second(&lines);
+    let lines = vec![
+        vec![
+            String::from("939"),
+            String::from("7,13,x,x,59,x,31,19"),
+        ],
+        vec![
+            String::from("939"),
+            String::from("17,x,13,19"),
+        ],
+    //    vec![
+    //        String::from("939"),
+    //        String::from("67,7,59,61"),
+    //    ],
+        vec![
+            String::from("939"),
+            String::from("67,x,7,59,61"),
+        ],
+        vec![
+            String::from("939"),
+            String::from("67,7,x,59,61"),
+        ],
+        vec![
+            String::from("939"),
+            String::from("1789,37,47,1889"),
+        ],
+        vec![
+            String::from("939"),
+            String::from("17,x,x,x,x,x,x,x,x,x,x,37,x,x,x,x,x,739,x,29,x,x,x,x,x,x,x,x,x,x,13,x,x,x,x,x,x,x,x,x,23,x,x,x,x,x,x,x,971,x,x,x,x,x,x,x,x,x,41,x,x,x,x,x,x,x,x,19"),
+        ],
+    ];
+    for line in &lines {
+        solve_second(line);
+    }
 }
 
 fn solve_first(lines: &Vec<String>) {
@@ -45,19 +80,14 @@ fn to_schedule(lines: &Vec<String>) -> Schedule {
 fn solve_second(lines: &Vec<String>) {
     let departures = to_departures(lines);
     let colls = find_collisions(&departures);
-    let mutual = find_common_denominator(&colls, &departures);
     println!("{:?}", &departures);
     println!("{:?}", colls);
-    println!("{:?}", mutual);
     let mut it = 1;
     loop {
-        let next = next_possible(it, &departures);
-        let t = next.0 - next.1;
-        if modulo64(t, departures[0].id as i64) == 0 {
-            if matches(t, &departures) {
-                println!("12.2 = {:?}", t);
-                break;
-            }
+        let t = colls.0 * it - colls.1;
+        if matches(t, &departures) {
+            println!("12.2 = {:?}", t);
+            break;
         }
         it += 1;
     }
@@ -83,57 +113,10 @@ fn calculate(departures: &Vec<Departure>) -> i64 {
     product
 }
 
-fn find_collisions(departures: &Vec<Departure>) -> Vec<HashSet<usize>> {
-    let mut map: HashMap<usize, usize> = HashMap::new();
-
-    for i in 0..departures.len() {
-        for j in 0..departures.len() {
-            if i == j {
-                continue;
-            }
-            let offset_diff = (departures[i].offset - departures[j].offset).abs();
-            if modulo64(departures[i].id, offset_diff) == 0 {
-                map.insert(i, j);
-            }
-        }
-    }
-    let mut groups: Vec<HashSet<usize>> = Vec::new();
-    for val in &map {
-        let mut group = HashSet::new();
-        group.insert(val.0.clone());
-        group.insert(val.1.clone());
-        for val2 in &map {
-            if val == val2 {
-                continue;
-            }
-            if val2.0 == val.0 || val2.1 == val.1 || val2.0 == val.1 || val2.1 == val.0 {
-                group.insert(val2.0.clone());
-                group.insert(val2.1.clone());
-            }
-        }
-        if groups.iter()
-            .all(|v| {
-                v.len() != group.len() || v.iter()
-                    .sum::<usize>() != group.iter().sum::<usize>()
-            }) {
-            groups.push(group);
-        }
-    }
-    let mut max_product = 0;
-    for val in map {
-        let mut product;
-        if departures[val.0].offset > departures[val.1].offset {
-            product = departures[val.0].id * (departures[val.1].id + departures[val.1].offset - departures[val.0].offset);
-        } else {
-            product = departures[val.1].id * (departures[val.0].id + departures[val.0].offset - departures[val.1].offset);
-        }
-        if product > max_product {
-            println!("{:?} {:?} {:?}", product, departures[val.0], departures[val.1]);
-            max_product = product;
-        }
-    }
-    println!("{:?}", max_product);
-    groups
+fn find_collisions(departures: &Vec<Departure>) -> (i64, i64) {
+    let mut max_product = (departures[0].id + departures[departures.len() - 1].offset) * departures[departures.len() - 1].id;
+    let mut max_offset = departures[departures.len() - 1].offset;
+    (max_product, max_offset)
 }
 
 fn find_common_denominator(groups: &Vec<HashSet<usize>>, departures: &Vec<Departure>) -> i64 {
