@@ -2,67 +2,29 @@ use crate::util::{modulo, modulo64};
 use std::collections::{HashMap, HashSet};
 use std::collections::hash_map::Entry;
 use std::collections::hash_map::Entry::Vacant;
+use modinverse::modinverse;
 
 pub fn solve_both(session: &str) {
     let lines = crate::util::fetch_lines(13, session);
-    /*
-    let lines = vec![
-        String::from("939"),
-        String::from("7,13,x,x,59,x,31,19"),
-    ];
-
-     */
     solve_first(&lines);
-    let lines = vec![
-        vec![
-            String::from("939"),
-            String::from("7,13,x,x,59,x,31,19"),
-        ],
-        vec![
-            String::from("939"),
-            String::from("17,x,13,19"),
-        ],
-    //    vec![
-    //        String::from("939"),
-    //        String::from("67,7,59,61"),
-    //    ],
-        vec![
-            String::from("939"),
-            String::from("67,x,7,59,61"),
-        ],
-        vec![
-            String::from("939"),
-            String::from("67,7,x,59,61"),
-        ],
-        vec![
-            String::from("939"),
-            String::from("1789,37,47,1889"),
-        ],
-        vec![
-            String::from("939"),
-            String::from("17,x,x,x,x,x,x,x,x,x,x,37,x,x,x,x,x,739,x,29,x,x,x,x,x,x,x,x,x,x,13,x,x,x,x,x,x,x,x,x,23,x,x,x,x,x,x,x,971,x,x,x,x,x,x,x,x,x,41,x,x,x,x,x,x,x,x,19"),
-        ],
-    ];
-    for line in &lines {
-        solve_second(line);
-    }
+    solve_second(&lines);
 }
 
 fn solve_first(lines: &Vec<String>) {
     let schedule = to_schedule(&lines);
-    let mut wait = i64::max_value();
-    let mut id = 0i64;
+    let mut wait = i128::max_value();
+    let mut id = 0i128;
     for bus in &schedule.buss_departures {
         let current = find_wait(&schedule.earliest_departure.clone(), bus);
         if wait > current {
             wait = current;
-            id = bus.clone() as i64;
+            id = bus.clone() as i128
         }
     }
-    println!("12.1 = {:?}", wait * id);
+    println!("13.1 = {:?}", wait * id);
 }
 
-fn find_wait(departure: &i64, bus_id: &i64) -> i64 {
+fn find_wait(departure: &i128, bus_id: &i128) -> i128 {
     bus_id - modulo64(departure.clone(), bus_id.clone())
 }
 
@@ -79,90 +41,59 @@ fn to_schedule(lines: &Vec<String>) -> Schedule {
 
 fn solve_second(lines: &Vec<String>) {
     let departures = to_departures(lines);
-    let colls = find_collisions(&departures);
-    println!("{:?}", &departures);
-    println!("{:?}", colls);
-    let mut it = 1;
-    loop {
-        let t = colls.0 * it - colls.1;
-        if matches(t, &departures) {
-            println!("12.2 = {:?}", t);
-            break;
-        }
-        it += 1;
-    }
-    println!("{:?}", it);
-
+    let colls = to_remainder_parts(&departures);
+    let modulo = do_remainder(&colls);
+    println!("13.2 = {:?}", modulo.0 - departures[departures.len() - 1].offset);
 }
 
-fn next_possible(it: i64, departures: &Vec<Departure>) -> (i64, i64) {
-    let mut max_ind = 0;
-    for i in 0..departures.len() {
-        if departures[i].id > departures[max_ind].id {
-            max_ind = i;
-        }
-    }
-    (departures[max_ind].id as i64 * it, departures[max_ind].offset as i64)
-}
-
-fn calculate(departures: &Vec<Departure>) -> i64 {
-    let mut product = 1i64;
+fn calculate(departures: &Vec<Departure>) -> i128 {
+    let mut product = 1i128;
     for departure in departures {
-        product *= (departure.id - departure.offset) as i64;
+        product *= (departure.id - departure.offset) as i128;
     }
     product
 }
 
-fn find_collisions(departures: &Vec<Departure>) -> (i64, i64) {
-    let mut max_product = (departures[0].id + departures[departures.len() - 1].offset) * departures[departures.len() - 1].id;
-    let mut max_offset = departures[departures.len() - 1].offset;
-    (max_product, max_offset)
+fn to_remainder_parts(departures: &Vec<Departure>) -> Vec<RemainderPart> {
+    let max_offset = departures[departures.len() - 1].offset;
+    departures.iter()
+        .map(|d| RemainderPart{rem: modulo64(max_offset - d.offset, d.id), modulo: d.id})
+        .collect()
 }
 
-fn find_common_denominator(groups: &Vec<HashSet<usize>>, departures: &Vec<Departure>) -> i64 {
-    let mut commons = Vec::new();
-    for group in groups {
-        let mut product = 1i64;
-        let max = &departures[find_max_offset_ind(&group.iter().map(|ind| departures[*ind].clone()).collect())];
-        for ind in group {
-            product *= (max.offset - departures[*ind].offset + departures[*ind].id);
+fn do_remainder(remainders: &Vec<RemainderPart>) -> (i128, i128) {
+    let mut parts: Vec<i128> = vec![0; remainders.len()];
+    for i in 0..remainders.len() {
+        let wanted_mod = remainders[i].modulo;
+        for j in 0..remainders.len() {
+            if i == j {
+                continue;
+            }
+            if parts[j] == 0 {
+                parts[j] += wanted_mod;
+            } else {
+                parts[j] *= wanted_mod;
+            }
         }
-        commons.push(product);
     }
-    *commons.iter().max().unwrap()
-}
+    for i in 0..remainders.len() {
+        let wanted_mod = remainders[i].modulo;
+        let wanted_rem = remainders[i].rem;
+        let actual = modulo64(parts[i], wanted_mod);
+        if actual != wanted_rem {
+            parts[i] *= modinverse(actual, wanted_mod).unwrap() * wanted_rem;
+        }
 
-fn find_max_offset_ind(departures: &Vec<Departure>) -> usize {
-    let mut max_val = 0i64;
-    let mut max_ind = 0usize;
-    for i in 0..departures.len() {
-        if departures[i].offset > max_val {
-            max_val = departures[i].offset;
-            max_ind = i;
-        }
     }
-    max_ind
-}
-
-fn find_min_offset_ind(departures: &Vec<Departure>) -> usize {
-    let mut min_val = i64::max_value();
-    let mut min_ind = 0usize;
-    for i in 0..departures.len() {
-        if departures[i].offset < min_val {
-            min_val = departures[i].offset;
-            min_ind = i;
-        }
+    let mut sum = 0;
+    for part in &parts {
+        sum += part;
     }
-    min_ind
-}
-
-fn matches(t: i64, departures: &Vec<Departure>) -> bool {
-    for departure in departures {
-        if departure.offset != modulo64(find_wait(&t, &departure.id), departure.id) {
-            return false;
-        }
+    let mut last_mod = 1;
+    for remainder in remainders {
+        last_mod *= remainder.modulo;
     }
-    true
+    (modulo64(sum, last_mod), last_mod)
 }
 
 fn to_departures(lines: &Vec<String>) -> Vec<Departure> {
@@ -179,12 +110,18 @@ fn to_departures(lines: &Vec<String>) -> Vec<Departure> {
 
 #[derive(Debug)]
 struct Schedule {
-    earliest_departure: i64,
-    buss_departures: Vec<i64>
+    earliest_departure: i128,
+    buss_departures: Vec<i128>
 }
 
 #[derive(Debug, Copy, Clone)]
 struct Departure {
-    id: i64,
-    offset: i64
+    id: i128,
+    offset: i128
+}
+
+#[derive(Debug)]
+struct RemainderPart {
+    rem: i128,
+    modulo: i128,
 }

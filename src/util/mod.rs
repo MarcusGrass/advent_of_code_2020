@@ -19,9 +19,9 @@ pub fn modulo(a: i32, b: i32) -> i32 {
     return ((a % b) + b) % b
 }
 
-pub fn modulo64(a: i64, b: i64) -> i64 {
+pub fn modulo64(a: i128, b: i128) -> i128 {
     if b == 0 {
-        return i64::min_value();
+        return i128::min_value();
     }
     return ((a % b) + b) % b
 }
