@@ -9,3 +9,5 @@ pub mod aoc_eight;
 pub mod aoc_nine;
 pub mod aoc_ten;
 pub mod aoc_eleven;
+pub mod aoc_twelve;
+pub mod aoc_13;
