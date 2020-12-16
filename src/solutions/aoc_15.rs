@@ -18,7 +18,6 @@ fn solve_second(numbers: &Vec<usize>) {
 fn solve(numbers: &Vec<usize>, it: usize) -> usize {
     let mut map = HashMap::new();
     let mut last = Spoken{last_spoken: 0, num: 0};
-    let mut exp = 10;
     for i in 1..it + 1 {
         if i < numbers.len() + 1 {
             map.insert(numbers[i - 1], i);
