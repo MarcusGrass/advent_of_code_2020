@@ -75,20 +75,16 @@ fn tick_ind_of_range_ind(ranges: &Vec<((i32, i32), (i32, i32))>, tickets: &Vec<T
                             let mut map = HashMap::new();
                             map.insert(j, 1);
                             v.insert(map);
-                            ()
                         },
                         Entry::Occupied(mut o) => {
                             match o.get_mut().entry(j) {
                                 Entry::Vacant(v) => {
                                     v.insert(1);
-                                    ()
                                 },
                                 Entry::Occupied(mut o) => {
                                     o.insert(o.get() + 1);
-                                    ()
                                 }
                             };
-                            ()
                         }
                     }
                 }
@@ -108,11 +104,9 @@ fn reduce(sum_map: &HashMap<usize, HashMap<usize, usize>>, categories: usize) ->
                         let mut map = HashMap::new();
                         map.insert(sub.0, sub.1);
                         v.insert(map);
-                        ()
                     },
                     Entry::Occupied(mut o) => {
                         o.get_mut().insert(sub.0, sub.1);
-                        ()
                     }
                 }
             }

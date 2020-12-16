@@ -5,17 +5,8 @@ const  DIRECTIONS: [Direction; 4] = [N, E, S, W];
 
 pub fn solve_both(session: &str) {
     let lines = crate::util::fetch_lines(12, session);
-    /*
-    let lines = vec![
-        String::from("F10"),
-        String::from("N3"),
-        String::from("F7"),
-        String::from("R90"),
-        String::from("F11")];
-
-     */
     let movements = to_movements(&lines);
-    // solve_first(&movements);
+    solve_first(&movements);
     solve_second(&movements);
 }
 
@@ -66,9 +57,6 @@ fn solve_second(movements: &Vec<Movement>) {
             N | E | S | W => waypoint = move_waypoint(movement, &waypoint),
             _ => waypoint = turn_waypoint(movement, &waypoint),
         }
-    }
-    for acc in &accumulated {
-        println!("{:?}", acc);
     }
     let manhattan = accumulated.get(&N).unwrap().abs() + accumulated.get(&E).unwrap().abs();
     println!("12.2 = {:?}", manhattan);

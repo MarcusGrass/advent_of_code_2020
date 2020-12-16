@@ -26,7 +26,7 @@ fn solve_first(numbers: &Vec<i64>) -> i64 {
             break;
         }
     }
-    println!("5.1 = {}", target);
+    println!("9.1 = {}", target);
     target
 }
 
@@ -39,7 +39,7 @@ fn solve_second(needle: i64, numbers: &Vec<i64>) {
             nums.push(numbers[i]);
             sum += numbers[i];
             if sum == needle {
-                println!("5.2 = {}", nums.iter().min().unwrap() + nums.iter().max().unwrap());
+                println!("9.2 = {}", nums.iter().min().unwrap() + nums.iter().max().unwrap());
                 return;
             } else if sum > needle {
                 break;
