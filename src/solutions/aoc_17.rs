@@ -1,12 +1,6 @@
 use std::ops::Range;
 
 pub fn solve_both(session: &str) {
-    let lines = vec![
-        String::from(".#."),
-        String::from("..#"),
-        String::from("###")
-    ];
-
     let lines = crate::util::fetch_lines(17, session);
     let mut grid = to_matrix(&lines);
     grid.expand();
@@ -302,11 +296,4 @@ impl HyperGrid {
         }
     }
 
-}
-
-#[derive(Debug, Copy, Clone)]
-struct Coord {
-    x: i32,
-    y: i32,
-    z: i32
 }
